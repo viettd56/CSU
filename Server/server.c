@@ -90,10 +90,8 @@ void dostuff (int sock)
         printf("File %s Cannot be opened.\n", fr_name);
     else
     {
-        
-
         if (n < 0) error("ERROR reading from socket");
-        fwrite(buffer, sizeof(char), n, fr);
+        fwrite(buffer + SIZE_NAME, sizeof(char), n - SIZE_NAME, fr); /* write data to file */
         n = write(sock,"I got your file",16);
         if (n < 0) error("ERROR writing to socket");
         
