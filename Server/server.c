@@ -11,8 +11,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-int LENGTH = 10000 + 256;
-int SIZE_NAME = 256;
+const int NAME_SIZE = 256;
+const int FLAG_SIZE = 3;
+const int LENGTH = FLAG_SIZE + NAME_SIZE;
+
 
 void dostuff(int); /* function prototype */
 void error(const char *msg)
@@ -74,25 +76,65 @@ void dostuff (int sock)
     char buffer[LENGTH];
     bzero(buffer, LENGTH); 
     n = read(sock,buffer,LENGTH); /* read stream upload to buffer */
-    
-
-    char file_name[SIZE_NAME]; /* name file upload */
-    strncpy(file_name, buffer, SIZE_NAME);
+    if (n < 0) error("ERROR reading from socket");
+	
+	char cFLAG[FLAG_SIZE];
+	strncpy(cFLAG, buffer, FLAG_SIZE);
+	const int flag = atoi(cFLAG);
+	
+    char file_name[NAME_SIZE]; /* name file upload */
+    strncpy(file_name, buffer + 3, NAME_SIZE);
 
  /* Receive File from Client */
     printf("[Client] Receiveing file from Client and saving it as %s...", file_name);
     
     char* fr_name = "/home/viettd/host/"; /* dir to file */
     strcat (fr_name, file_name);
-
-    FILE *fr = fopen(fr_name, "w");
+	
+	if (flag == 200) FILE *fr = fopen(fr_name, "w");
+	else if (flag == 201){
+		FILE *fr = fopen(fr_name, "a");
+		int sz = ftell(fr); /* file's size */
+		
+		cFLAG = "202";
+		char msg[LENGTH];
+		strncpy(msg, cFLAG, FLAG_SIZE);
+		
+		char cSz[NAME_SIZE];
+		itoa(cSz, sz, 10);
+		strncpy(msg, cSz, sizeof(cSz));
+		
+		n = write(sock,msg,sizeof(msg));
+		if (n < 0) error("ERROR writing to socket");
+        
+	} 
+	
     if(fr == NULL)
         printf("File %s Cannot be opened.\n", fr_name);
     else
     {
-        if (n < 0) error("ERROR reading from socket");
-        fwrite(buffer + SIZE_NAME, sizeof(char), n - SIZE_NAME, fr); /* write data to file */
-        n = write(sock,"I got your file",16);
+		/* first buffer */
+		n = read(sock,buffer,LENGTH);
+		if (n < 0) error("ERROR reading from socket");
+		
+		/* get flag */
+		char cFLAG[FLAG_SIZE];
+		strncpy(cFLAG, buffer, FLAG_SIZE);
+		const int flag = atoi(cFLAG);
+        
+		if (flag != 400){
+			error("Error first buffer");
+		}
+		
+		/* write first data */
+        fwrite(buffer + FLAG_SIZE, sizeof(char), n - FLAG_SIZE, fr); /* write data to file */
+        
+		while (n = read(sock,buffer,LENGTH)){
+			/* write next data */
+			fwrite(buffer, sizeof(char), n, fr); /* write data to file */
+		}
+		
+		n = write(sock,"I got your file",16);
         if (n < 0) error("ERROR writing to socket");
         
         printf("Ok received from client!\n");
