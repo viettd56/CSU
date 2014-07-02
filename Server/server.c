@@ -91,9 +91,9 @@ void dostuff (int sock)
     char* fr_name = "/home/viettd/host/"; /* dir to file */
     strcat (fr_name, file_name);
 	
-	if (flag == 200) FILE *fr = fopen(fr_name, "w");
+	if (flag == 200) FILE *fr = fopen(fr_name, "wb");
 	else if (flag == 201){
-		FILE *fr = fopen(fr_name, "a");
+		FILE *fr = fopen(fr_name, "ab");
 		int sz = ftell(fr); /* file's size */
 		
 		cFLAG = "202";
@@ -127,10 +127,12 @@ void dostuff (int sock)
 		}
 		
 		/* write first data */
+		fflush(fr);
         fwrite(buffer + FLAG_SIZE, sizeof(char), n - FLAG_SIZE, fr); /* write data to file */
         
 		while (n = read(sock,buffer,LENGTH)){
 			/* write next data */
+			fflush(fr);
 			fwrite(buffer, sizeof(char), n, fr); /* write data to file */
 		}
 		
