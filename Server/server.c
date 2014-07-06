@@ -106,14 +106,14 @@ void dostuff (int sock)
         /* if upload new file */
         if (strcmp(cFlag, "STOR") == 0)
         {
-            FILE *fr = fopen(fr_name, "w");
+            FILE *fr = fopen(fr_name, "wb");
             printf("STOR\n");
             write_data(fr, sock, buffer);
         }
         /* if resume upload */
         else if (strcmp(cFlag, "APPE") == 0)
         {
-            FILE *fr = fopen(fr_name, "a");
+            FILE *fr = fopen(fr_name, "ab");
             printf("APPE\n");
             write_data(fr, sock, buffer);
         }
