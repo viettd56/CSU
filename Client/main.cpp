@@ -1,16 +1,21 @@
-#include "uploadClient.h"
+#include <iostream>
+#include "UploadClient.h"
 
-using namespace client;
+using std::cerr;
+using std::cout;
+using std::endl;
+using client::UploadClient;
+using namespace std;
+int main() {
 
-int main(){
-	UploadClient client;
-	char * filename = new char[256];
-	int n =client.setConnection("localhost",123);
-	if(n == 0){
-		cout << "Nhap ten file can upload : " << endl;
-		cin.getline(filename,256);
-		cout << filename << endl;
-		client.upload(filename);
+	char s[256];
+	try {
+		UploadClient* client = new UploadClient("localhost", 1234);
+		cout << "Nhap ten file :";
+		cin.getline(s,256);
+		client->upload(s);
+	} catch (exception&e) {
+		cerr << e.what();
 	}
 	return 0;
 }

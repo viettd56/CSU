@@ -1,11 +1,13 @@
 all: client
-client: main.o uploadClient.o
-	g++ main.o uploadClient.o -o client
+client: main.o UploadClient.o Connection.o ConnectException.o
+	g++ main.o UploadClient.o Connection.o ConnectException.o -o client
 main.o: main.cpp
 	g++ -c main.cpp
-
-uploadClient.o: uploadClient.cpp
-	g++ -c uploadClient.cpp
-
+UploadClient.o: UploadClient.cpp
+	g++ -c UploadClient.cpp
+Connection.o : Connection.cpp
+	g++ -c Connection.cpp
+ConnectException.o : ConnectException.cpp
+	g++ -c ConnectException.cpp
 clean:
 	rm -rf *.o client
