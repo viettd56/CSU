@@ -94,8 +94,7 @@ void dostuff (int sock)
         strncpy(cFlag, buffer, FLAG_SIZE);
 
         char file_name[DATA_SIZE]; /* name file upload */
-        strncpy(file_name, buffer + FLAG_SIZE, DATA_SIZE);
-
+        strncpy(file_name, buffer + FLAG_SIZE + 1, DATA_SIZE - 1);
 
         char fr_name[256];
         bzero(fr_name, sizeof(fr_name));
@@ -121,15 +120,19 @@ void dostuff (int sock)
         else if (strcmp(cFlag, "SIZE") == 0)
         {
             FILE *fr = fopen(fr_name, "a");
-
+            
+            //get file's size 
             int sz = ftell(fr);
             char cSz[DATA_SIZE];
             bzero(cSz, sizeof(cSz));
             snprintf(cSz, DATA_SIZE, "%d", sz);
 
+            //Sent file's size to client
+            
             n = write(sock, cSz, strlen(cSz));
             if (n < 0) error("ERROR writing to socket");
         }
+        // Quit
         else if (strcmp(cFlag, "QUIT") == 0)
         {
             char *msg = "221 Service closing control connection.";
@@ -137,6 +140,7 @@ void dostuff (int sock)
             if (n < 0) error("ERROR writing to socket");
             return;
         }
+        // not implement
         else
         {
             char *msg = "500 Syntax error, command unrecognized.";
@@ -162,7 +166,6 @@ void write_data(FILE *fr, int sock, char *buffer)
     }
     else
     {
-
         char *msg125 = "125 Data connection already open; transfer starting.";
         n = write(sock, msg125, strlen(msg125));
         if (n < 0) error("ERROR writing to socket");
@@ -174,12 +177,15 @@ void write_data(FILE *fr, int sock, char *buffer)
         /* begin receive */
         while (n = read(sock, buffer, sizeof(buffer)))
         {
+            //Check end of file
+            if (strcmp(buffer, "\r\n") == 0) break;
+
             /* write data */
             fflush(fr);
             fwrite(buffer, sizeof(char), n, fr); /* write data to file */
         }
 
-        char *msg250 = "250 Requested file action okay, completed.";
+        char *msg250 = "226 Closing data connection. Requested file action successful ";
         n = write(sock, msg250, strlen(msg250));
         if (n < 0) error("ERROR writing to socket");
 
