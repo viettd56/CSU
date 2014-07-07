@@ -122,13 +122,16 @@ void dostuff (int sock)
         {
             FILE *fr = fopen(fr_name, "rb");
 
-            // If file not exist
+            // If file not exist, return size 0
             if (fr == NULL)
             {
-                fprintf(stderr, "File unavailable.\n");
-                char *msg = "550 Requested action not taken. File unavailable.";
-                printf("%s", msg);
-                n = write(sock, msg, strlen(msg));
+                // fprintf(stderr, "File unavailable.\n");
+                // char *msg = "550 Requested action not taken. File unavailable.";
+                // printf("%s", msg);
+                // n = write(sock, msg, strlen(msg));
+                // if (n < 0) error("ERROR writing to socket");
+                char *sz = "0";
+                n = write(sock, sz, strlen(sz));
                 if (n < 0) error("ERROR writing to socket");
                 continue;
             }
