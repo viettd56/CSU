@@ -87,6 +87,7 @@ void dostuff (int sock)
     bzero(buffer, LENGTH);
     while (1)
     {
+        bzero(buffer, LENGTH);
         n = read(sock, buffer, LENGTH); /* read stream upload to buffer */
         if (n < 0) error("ERROR reading from socket");
 
@@ -101,7 +102,7 @@ void dostuff (int sock)
         strcat (fr_name, ""); /* dir to file */
         strcat (fr_name, file_name);
         printf("%s\n", fr_name);
-        //printf("Flag: %s\n", cFlag);
+        printf("Flag: %s\n", cFlag);
         /* if upload new file */
         if (strcmp(cFlag, "STOR") == 0)
         {
@@ -119,16 +120,28 @@ void dostuff (int sock)
         /* check size of file */
         else if (strcmp(cFlag, "SIZE") == 0)
         {
-            FILE *fr = fopen(fr_name, "a");
-            
-            //get file's size 
+            FILE *fr = fopen(fr_name, "rb");
+
+            // If file not exist
+            if (fr == NULL)
+            {
+                fprintf(stderr, "File unavailable.\n");
+                char *msg = "550 Requested action not taken. File unavailable.";
+                printf("%s", msg);
+                n = write(sock, msg, strlen(msg));
+                if (n < 0) error("ERROR writing to socket");
+                continue;
+            }
+
+            //get file's size
+            fseek(fr, 0, SEEK_END);
             int sz = ftell(fr);
             char cSz[DATA_SIZE];
             bzero(cSz, sizeof(cSz));
             snprintf(cSz, DATA_SIZE, "%d", sz);
 
             //Sent file's size to client
-            
+
             n = write(sock, cSz, strlen(cSz));
             if (n < 0) error("ERROR writing to socket");
         }
@@ -173,7 +186,7 @@ void write_data(FILE *fr, int sock, char *buffer)
         /* Receive File from Client */
         printf("[Client] Receiveing file from Client and saving it\n");
 
-
+        bzero(buffer, LENGTH);
         /* begin receive */
         while (n = read(sock, buffer, sizeof(buffer)))
         {
@@ -183,10 +196,11 @@ void write_data(FILE *fr, int sock, char *buffer)
             /* write data */
             fflush(fr);
             fwrite(buffer, sizeof(char), n, fr); /* write data to file */
+            bzero(buffer, LENGTH);
         }
 
-        char *msg250 = "226 Closing data connection. Requested file action successful ";
-        n = write(sock, msg250, strlen(msg250));
+        char *msg226 = "226 Closing data connection. Requested file action successful ";
+        n = write(sock, msg226, strlen(msg226));
         if (n < 0) error("ERROR writing to socket");
 
         printf("Ok received from client!\n");
