@@ -13,11 +13,9 @@ process for each connection
 
 const int DATA_SIZE = 256;
 const int FLAG_SIZE = 4;
-int LENGTH;
-const int PORT_STOR = 20;
 
 
-void dostuff(int); /* function prototype */
+void dostuff(int, int); /* function prototype */
 void write_data(FILE *fr, int sock, char *buff);
 void error(const char *msg)
 {
@@ -27,7 +25,7 @@ void error(const char *msg)
 
 int main(int argc, char *argv[])
 {
-    LENGTH = FLAG_SIZE + DATA_SIZE;
+    const int LENGTH = FLAG_SIZE + DATA_SIZE;
     int sockfd, newsockfd, portno, pid;
     socklen_t clilen;
     struct sockaddr_in serv_addr, cli_addr;
@@ -37,17 +35,22 @@ int main(int argc, char *argv[])
         fprintf(stderr, "ERROR, no port provided\n");
         exit(1);
     }
+    portno = atoi(argv[1]);
 
+     
     /* server */
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
         error("ERROR opening socket server control");
+
     bzero((char *) &serv_addr, sizeof(serv_addr));
     portno = atoi(argv[1]);
+
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
+
     if (bind(sockfd, (struct sockaddr *) &serv_addr,
              sizeof(serv_addr)) < 0)
         error("ERROR on binding");
@@ -66,7 +69,7 @@ int main(int argc, char *argv[])
         if (pid == 0)
         {
             close(sockfd);
-            dostuff(newsockfd);
+            dostuff(newsockfd, LENGTH);
             exit(0);
         }
         else close(newsockfd);
@@ -75,12 +78,13 @@ int main(int argc, char *argv[])
     return 0; /* we never get here */
 }
 
+
 /******** DOSTUFF() *********************
 There is a separate instance of this function
 for each connection.  It handles all communication
 once a connnection has been established.
 *****************************************/
-void dostuff (int sock)
+void dostuff (int sock, const int LENGTH)
 {
     int n;
     char buffer[LENGTH];
@@ -94,14 +98,14 @@ void dostuff (int sock)
         char cFlag[FLAG_SIZE]; //Command
         strncpy(cFlag, buffer, FLAG_SIZE);
 
-        char file_name[DATA_SIZE]; /* name file upload */
-        strncpy(file_name, buffer + FLAG_SIZE + 1, DATA_SIZE - 1);
+        //char file_name[DATA_SIZE]; /* name file upload */
+        //strncpy(file_name, buffer + FLAG_SIZE + 1, n - 1 - FLAG_SIZE);
 
         char fr_name[256];
         bzero(fr_name, sizeof(fr_name));
         strcat (fr_name, ""); /* dir to file */
-        strcat (fr_name, file_name);
-        printf("%s\n", fr_name);
+        strcat (fr_name, buffer + FLAG_SIZE + 1);
+        
         printf("Flag: %s\n", cFlag);
         /* if upload new file */
         if (strcmp(cFlag, "STOR") == 0)
@@ -121,11 +125,11 @@ void dostuff (int sock)
         else if (strcmp(cFlag, "SIZE") == 0)
         {
             FILE *fr = fopen(fr_name, "rb");
-
+            printf("file name:%s\n", fr_name);
             // If file not exist, return size 0
             if (fr == NULL)
             {
-                // fprintf(stderr, "File unavailable.\n");
+                fprintf(stderr, "File unavailable.\n");
                 // char *msg = "550 Requested action not taken. File unavailable.";
                 // printf("%s", msg);
                 // n = write(sock, msg, strlen(msg));
@@ -140,18 +144,19 @@ void dostuff (int sock)
             fseek(fr, 0, SEEK_END);
             int sz = ftell(fr);
             char cSz[DATA_SIZE];
-            bzero(cSz, sizeof(cSz));
             snprintf(cSz, DATA_SIZE, "%d", sz);
 
             //Sent file's size to client
 
             n = write(sock, cSz, strlen(cSz));
+            printf("file size: %s\n", cSz);
             if (n < 0) error("ERROR writing to socket");
         }
         // Quit
         else if (strcmp(cFlag, "QUIT") == 0)
         {
-            char *msg = "221 Service closing control connection.";
+            //char *msg = "221 Service closing control connection.";
+            char *msg = "221";
             n = write(sock, msg, strlen(msg));
             if (n < 0) error("ERROR writing to socket");
             return;
@@ -159,9 +164,10 @@ void dostuff (int sock)
         // not implement
         else
         {
-            char *msg = "500 Syntax error, command unrecognized.";
+            //char *msg = "500 Syntax error, command unrecognized.";
+            char *msg = "500";
             n = write(sock, msg, strlen(msg));
-            printf("n = %d\n", n);
+            //printf("n = %d\n", n);
             if (n < 0) error("ERROR writing to socket");
             continue;
         }
@@ -175,13 +181,18 @@ void write_data(FILE *fr, int sock, char *buffer)
     {
         /* cannot open file */
         fprintf(stderr, "Cannot open file.\n");
-        char *msg = "553 Requested action not taken. File name not allowed.";
+        //char *msg = "553 Requested action not taken. File name not allowed.";
+        char *msg = "553";
         printf("%s", msg);
         n = write(sock, msg, strlen(msg));
         if (n < 0) error("ERROR writing to socket");
     }
     else
     {
+<<<<<<< HEAD
+=======
+        //char *msg125 = "125 Data connection already open; transfer starting.";
+>>>>>>> 42e30a8885331b433b575e3b1768245363adbaf8
         char *msg125 = "125";
         n = write(sock, msg125, strlen(msg125));
         if (n < 0) error("ERROR writing to socket");
@@ -189,20 +200,24 @@ void write_data(FILE *fr, int sock, char *buffer)
         /* Receive File from Client */
         printf("[Client] Receiveing file from Client and saving it\n");
 
-        bzero(buffer, LENGTH);
+        bzero(buffer, sizeof(buffer));
         /* begin receive */
         while (n = read(sock, buffer, sizeof(buffer)))
         {
-            //Check end of file
-            if (strcmp(buffer, "\r\n") == 0) break;
+            // printf("get: %s\n", buffer);
+            // //Check end of file
+            if (strcmp(buffer, "\r\n") == 0){
+                printf("end file");
+              break;  
+            } 
 
             /* write data */
             fflush(fr);
             fwrite(buffer, sizeof(char), n, fr); /* write data to file */
-            bzero(buffer, LENGTH);
         }
 
-        char *msg226 = "226 Closing data connection. Requested file action successful ";
+        //char *msg226 = "226 Closing data connection. Requested file action successful ";
+        char *msg226 = "226";
         n = write(sock, msg226, strlen(msg226));
         if (n < 0) error("ERROR writing to socket");
 
