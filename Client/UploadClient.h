@@ -26,7 +26,7 @@ public:
 	virtual ~UploadClient();
 
 	int upload(const char* filename);
-	int resume(const char* filename, const int pos);
+	int resume(const char* filename);
 private:
 	Connection* connect;
 };

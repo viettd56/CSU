@@ -13,7 +13,8 @@ int main() {
 		UploadClient* client = new UploadClient("localhost", 1234);
 		cout << "Nhap ten file :";
 		cin.getline(s,256);
-		client->upload(s);
+		//client->upload(s);
+		client->resume(s);
 	} catch (exception&e) {
 		cerr << e.what();
 	}

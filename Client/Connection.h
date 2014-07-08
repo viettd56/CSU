@@ -28,6 +28,7 @@ namespace connection {
 class Connection {
 public:
 	Connection();
+	Connection(const char* host, const int port);
 	~Connection();
 
 	int setConnection(const char* host, const int iPort)
