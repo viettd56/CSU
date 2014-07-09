@@ -189,7 +189,10 @@ void write_data(FILE *fr, int sock, char *buffer)
     }
     else
     {
+<<<<<<< HEAD
+=======
         //char *msg125 = "125 Data connection already open; transfer starting.";
+>>>>>>> 42e30a8885331b433b575e3b1768245363adbaf8
         char *msg125 = "125";
         n = write(sock, msg125, strlen(msg125));
         if (n < 0) error("ERROR writing to socket");

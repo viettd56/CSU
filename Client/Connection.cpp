@@ -14,12 +14,19 @@ using std::string;
 const int BUFFER_SIZE = 256;
 
 namespace connection {
+
 Connection::Connection() {
-	cout << "Connection created !" << endl;
+	//cout << "Connection created !" << endl;
+	/* Do nothing*/
 }
+
+Connection::Connection(const char* host, int port) {
+	setConnection(host, port);
+}
+
 Connection::~Connection() {
 	close(sockfd);
-	cout << "Connection detroyed !" << endl;
+	//cout << "Connection detroyed !" << endl;
 }
 
 int Connection::setConnection(const char* host, const int iPort)
