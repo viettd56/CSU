@@ -78,6 +78,8 @@ int UploadClient::resume(const char* filename) {
 		cerr << "No such file or directory " << endl;
 		return 0;
 	}
+	is.seekg(0, std::ios::end);
+	int length = is.tellg();
 	//send signal resume
 	char * message = new char[RBUFFER_LENGTH + 4];
 	strcpy(message, "SIZE ");
@@ -85,6 +87,7 @@ int UploadClient::resume(const char* filename) {
 	connect->Open(); //open connect
 	connect->send(message, strlen(message));
 	connect->receive(buffer, RBUFFER_LENGTH);
+	std::cout << "POS " << buffer << endl;
 	int pos = atoi(buffer);
 	//check file name
 	is.open(filename, std::ios::binary);
@@ -95,26 +98,39 @@ int UploadClient::resume(const char* filename) {
 	//send signal resume
 	strcpy(message, "APPE ");
 	strcat(message, filename);
+	std::cout << "send  : " << message << endl;
 	connect->send(message, strlen(message));
 	connect->receive(buffer, RBUFFER_LENGTH);
+	std::cout << "receive : " << buffer << endl;
+	ifstream iss;
+		iss.open(filename, std::ios::binary);
+		if (!iss.is_open()) {
+			cerr << "No such file or directory " << endl;
+			return 0;
+		}
 	if (0 == strcmp(buffer, "125")) {
 		//send data
 		// get length of file:
-		is.seekg(0, std::ios::end);
-		int length = is.tellg();
+		iss.seekg(0, std::ios::beg);
+		std::cout << "length : " << length << endl;
+		std::cout << "pos : " << pos << endl;
 		length -= pos; // so luong byte chua gui
-		is.seekg(pos, std::ios::beg); // chuyen den vi tri bat dau gui
+		std::cout << "byte chua gui " << length << endl;
+		std::cout << "con tro o vi tri" << iss.tellg() << endl;
+		iss.seekg(pos, std::ios::beg); // chuyen den vi tri bat dau gui
+		std::cout << "con tro o vi tri" << iss.tellg() << endl;
 		while (length > RBUFFER_LENGTH) {
 			bzero(buffer, RBUFFER_LENGTH);
 			// read data as a block:
-			is.seekg(0, std::ios::cur);
-			is.read(buffer, RBUFFER_LENGTH);
+			iss.seekg(0, std::ios::cur);
+			iss.read(buffer, RBUFFER_LENGTH);
+			std::cout << "con tro o vi tri" << iss.tellg() << endl;
 			length -= RBUFFER_LENGTH;
 			connect->send(buffer, RBUFFER_LENGTH);
 		}
 		bzero(buffer, RBUFFER_LENGTH);
-		is.seekg(0, std::ios::cur);
-		is.read(buffer, RBUFFER_LENGTH);
+		iss.seekg(0, std::ios::cur);
+		iss.read(buffer, RBUFFER_LENGTH);
 		connect->send(buffer, length);
 
 	} else {
