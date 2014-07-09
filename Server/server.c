@@ -201,7 +201,7 @@ void write_data(FILE *fr, int sock, char *buffer, const int LENGTH)
         /* begin receive */
         while (n = read(sock, buffer, sizeof(buffer)))
         {
-            printf("read: %s\n", buffer);
+            //printf("read: %s\n", buffer);
             if (n < 0)
             {
                 error("ERROR reading from socket\n");
@@ -227,6 +227,6 @@ void write_data(FILE *fr, int sock, char *buffer, const int LENGTH)
 
         printf("Ok received from client!\n");
         fclose(fr);
-        close(sock);
+        //close(sock);
     }
 }
