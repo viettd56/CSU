@@ -38,9 +38,10 @@ public:
 	int receive(char* buffer, const int n);
 
 	void Close();
+	void Open();
 
 private:
-
+	char*host;
 	int sockfd, port;
 	struct sockaddr_in serv_addr;
 	struct hostent *server;

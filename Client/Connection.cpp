@@ -20,11 +20,16 @@ Connection::Connection() {
 	/* Do nothing*/
 }
 
-Connection::Connection(const char* host, int port) {
-	setConnection(host, port);
+Connection::Connection(const char* cHost, int iPort) {
+	host = new char[strlen(cHost)];
+	strcpy(host,cHost);
+	port=iPort;
+	setConnection(cHost, iPort);
 }
 
 Connection::~Connection() {
+	delete host;
+	host = NULL;
 	close(sockfd);
 	//cout << "Connection detroyed !" << endl;
 }
@@ -67,6 +72,10 @@ int Connection::receive(char* buffer, const int size) {
 }
 void Connection::Close() {
 	close(sockfd);
+}
+
+void Connection::Open(){
+	setConnection(host, port);
 }
 }
 

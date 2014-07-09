@@ -43,9 +43,14 @@ int main(int argc, char* argv[]) {
 				} else {
 					cout << "resume success" << endl;
 				}
-			} else {
-				cout << "end" << endl;
+			} else if(strcmp(p,"quit")==0){
+				client->quit();
+				delete client;
+				client =NULL;
 				exit(0);
+			}
+			else {
+				usage();
 			}
 		} while (true);
 
@@ -58,6 +63,6 @@ void usage(void) {
 	cout << "\tUsage: client [hostname] [port]" << endl;
 	cout << "\t  	upload [filename] : upload file" << endl;
 	cout << "\t   	resume [filename] : resume file" << endl;
-	cout << "\t   	quit			:	quit " << endl;
+	cout << "\t   	quit              :	quit " << endl;
 }
 
