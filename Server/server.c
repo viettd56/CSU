@@ -227,5 +227,6 @@ void write_data(FILE *fr, int sock, char *buffer, const int LENGTH)
 
         printf("Ok received from client!\n");
         fclose(fr);
+        close(sock);
     }
 }
