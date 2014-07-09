@@ -87,7 +87,6 @@ int UploadClient::resume(const char* filename) {
 	connect->Open(); //open connect
 	connect->send(message, strlen(message));
 	connect->receive(buffer, RBUFFER_LENGTH);
-	std::cout << "POS " << buffer << endl;
 	int pos = atoi(buffer);
 	//check file name
 	is.open(filename, std::ios::binary);
@@ -98,10 +97,8 @@ int UploadClient::resume(const char* filename) {
 	//send signal resume
 	strcpy(message, "APPE ");
 	strcat(message, filename);
-	std::cout << "send  : " << message << endl;
 	connect->send(message, strlen(message));
 	connect->receive(buffer, RBUFFER_LENGTH);
-	std::cout << "receive : " << buffer << endl;
 	ifstream iss;
 		iss.open(filename, std::ios::binary);
 		if (!iss.is_open()) {
@@ -112,19 +109,13 @@ int UploadClient::resume(const char* filename) {
 		//send data
 		// get length of file:
 		iss.seekg(0, std::ios::beg);
-		std::cout << "length : " << length << endl;
-		std::cout << "pos : " << pos << endl;
 		length -= pos; // so luong byte chua gui
-		std::cout << "byte chua gui " << length << endl;
-		std::cout << "con tro o vi tri" << iss.tellg() << endl;
 		iss.seekg(pos, std::ios::beg); // chuyen den vi tri bat dau gui
-		std::cout << "con tro o vi tri" << iss.tellg() << endl;
 		while (length > RBUFFER_LENGTH) {
 			bzero(buffer, RBUFFER_LENGTH);
 			// read data as a block:
 			iss.seekg(0, std::ios::cur);
 			iss.read(buffer, RBUFFER_LENGTH);
-			std::cout << "con tro o vi tri" << iss.tellg() << endl;
 			length -= RBUFFER_LENGTH;
 			connect->send(buffer, RBUFFER_LENGTH);
 		}
