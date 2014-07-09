@@ -6,17 +6,58 @@ using std::cout;
 using std::endl;
 using client::UploadClient;
 using namespace std;
-int main() {
 
+void usage(void);
+int checkStep(char* s);
+
+int main(int argc, char* argv[]) {
+
+	if (argc < 3) {
+		cout << "\n\tUsage: " << argv[0] << " [hostname] [port]\n" << endl;
+		exit(0);
+	}
+	int portno = atoi(argv[2]);
+	int check = 0;
+	char* p;
 	char s[256];
 	try {
-		UploadClient* client = new UploadClient("localhost", 1234);
-		cout << "Nhap ten file :";
-		cin.getline(s,256);
-		//client->upload(s);
-		client->resume(s);
+		UploadClient* client = new UploadClient(argv[1], portno);
+		usage();
+		do {
+			cout << ">";
+			cin.getline(s, 256);
+			p = strtok(s, " ");
+			if (strcmp(p, "upload") == 0) {
+				p = strtok(NULL, " ");
+				check = client->upload(p);
+				if (check == 0) {
+					cout << "upload fail " << endl;
+				} else {
+					cout << "upload success" << endl;
+				}
+			} else if (strcmp(p, "resume") == 0) {
+				p = strtok(NULL, " ");
+				check = client->resume(p);
+				if (check == 0) {
+					cout << "resume fail " << endl;
+				} else {
+					cout << "resume success" << endl;
+				}
+			} else {
+				cout << "end" << endl;
+				exit(0);
+			}
+		} while (true);
+
 	} catch (exception&e) {
-		cerr << e.what();
+		cerr << e.what() << endl;
 	}
 	return 0;
 }
+void usage(void) {
+	cout << "\tUsage: client [hostname] [port]" << endl;
+	cout << "\t  	upload [filename] : upload file" << endl;
+	cout << "\t   	resume [filename] : resume file" << endl;
+	cout << "\t   	quit			:	quit " << endl;
+}
+

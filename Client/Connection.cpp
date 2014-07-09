@@ -54,12 +54,16 @@ int Connection::setConnection(const char* host, const int iPort)
 
 int Connection::send(const char* buffer, const int n) {
 	int result = write(sockfd, buffer, n);
+	if (result < 0)
+		throw ConnectException("Exception: cannot send data !");
 	return result;
 }
 int Connection::receive(char* buffer, const int size) {
 	bzero(buffer, size);
-	int n = read(sockfd, buffer, size);
-	return n;
+	int result = read(sockfd, buffer, size);
+	if (result < 0)
+		throw ConnectException("Exception: cannot receive data !");
+	return result;
 }
 void Connection::Close() {
 	close(sockfd);

@@ -27,6 +27,7 @@ public:
 
 	int upload(const char* filename);
 	int resume(const char* filename);
+	int test();
 private:
 	Connection* connect;
 };
