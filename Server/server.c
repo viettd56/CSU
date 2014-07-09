@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     }
     portno = atoi(argv[1]);
 
-     
+
     /* server */
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -105,7 +105,7 @@ void dostuff (int sock, const int LENGTH)
         bzero(fr_name, sizeof(fr_name));
         strcat (fr_name, ""); /* dir to file */
         strcat (fr_name, buffer + FLAG_SIZE + 1);
-        
+
         printf("Flag: %s\n", cFlag);
         /* if upload new file */
         if (strcmp(cFlag, "STOR") == 0)
@@ -199,14 +199,22 @@ void write_data(FILE *fr, int sock, char *buffer)
 
         bzero(buffer, sizeof(buffer));
         /* begin receive */
-        while (n = read(sock, buffer, sizeof(buffer)))
+        while (1)
         {
+            n = read(sock, buffer, sizeof(buffer));
+            printf("%s\n", buffer);
+            if (n < 0)
+            {
+                error("ERROR reading from socket\n");
+                break;
+            }
             // printf("get: %s\n", buffer);
             // //Check end of file
-            if (strcmp(buffer, "\r\n") == 0){
-                printf("end file");
-              break;  
-            } 
+            // if (strstr(buffer, "\r\n") != NULL)
+            // {
+            //     printf("end file");
+            //     break;
+            // }
 
             /* write data */
             fflush(fr);
@@ -214,9 +222,9 @@ void write_data(FILE *fr, int sock, char *buffer)
         }
 
         //char *msg226 = "226 Closing data connection. Requested file action successful ";
-        char *msg226 = "226";
-        n = write(sock, msg226, strlen(msg226));
-        if (n < 0) error("ERROR writing to socket");
+        // char *msg226 = "226";
+        // n = write(sock, msg226, strlen(msg226));
+        // if (n < 0) error("ERROR writing to socket");
 
         printf("Ok received from client!\n");
         fclose(fr);
