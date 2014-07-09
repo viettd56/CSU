@@ -16,7 +16,7 @@ const int FLAG_SIZE = 4;
 
 
 void dostuff(int, int); /* function prototype */
-void write_data(FILE *fr, int sock, char *buff);
+void write_data(FILE *fr, int sock, char *buff, const int LENGTH);
 void error(const char *msg)
 {
     perror(msg);
@@ -112,14 +112,14 @@ void dostuff (int sock, const int LENGTH)
         {
             FILE *fr = fopen(fr_name, "wb");
             printf("STOR\n");
-            write_data(fr, sock, buffer);
+            write_data(fr, sock, buffer, LENGTH);
         }
         /* if resume upload */
         else if (strcmp(cFlag, "APPE") == 0)
         {
             FILE *fr = fopen(fr_name, "ab");
             printf("APPE\n");
-            write_data(fr, sock, buffer);
+            write_data(fr, sock, buffer, LENGTH);
         }
         /* check size of file */
         else if (strcmp(cFlag, "SIZE") == 0)
@@ -174,7 +174,7 @@ void dostuff (int sock, const int LENGTH)
     }
 }
 
-void write_data(FILE *fr, int sock, char *buffer)
+void write_data(FILE *fr, int sock, char *buffer, const int LENGTH)
 {
     int n;
     if (fr == NULL)
@@ -197,12 +197,11 @@ void write_data(FILE *fr, int sock, char *buffer)
         /* Receive File from Client */
         printf("[Client] Receiveing file from Client and saving it\n");
 
-        bzero(buffer, sizeof(buffer));
+        bzero(buffer, LENGTH);
         /* begin receive */
-        while (1)
+        while (n = read(sock, buffer, sizeof(buffer)))
         {
-            n = read(sock, buffer, sizeof(buffer));
-            printf("%s\n", buffer);
+            printf("read: %s\n", buffer);
             if (n < 0)
             {
                 error("ERROR reading from socket\n");
