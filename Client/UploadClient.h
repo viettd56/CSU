@@ -27,7 +27,7 @@ public:
 
 	int upload(const char* filename);
 	int resume(const char* filename);
-	int test();
+	int quit();
 private:
 	Connection* connect;
 };
