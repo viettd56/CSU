@@ -1,5 +1,4 @@
-#include <unistd.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "server_execute.h"
 
@@ -7,7 +6,7 @@
 const int DATA_SIZE = 256;
 const int FLAG_SIZE = 4;
 
-/******** DO() *********************
+/******** EXECUTE() *********************
 There is a separate instance of this function
 for each connection.  It handles all communication
 once a connnection has been established.

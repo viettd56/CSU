@@ -3,6 +3,6 @@
 
 
 void error(const char *msg);
-int init_server(char *addr, const int port);
+int server_init(const int port); // Init server
 
 #endif

@@ -1,26 +1,19 @@
-/* A simple server in the internet domain using TCP
-The port number is passed as an argument
-This version runs forever, forking off a separate
-process for each connection
-*/
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <string.h>
 #include "server.h"
 
 void error(const char *msg)
 {
     perror(msg);
-    exit(1);
 }
 
-int init_server(char *addr, const int port)
+int server_init(const int port)
 {
-    const int LENGTH = FLAG_SIZE + DATA_SIZE;
-    int sockfd, newsockfd, portno, pid;
-    socklen_t clilen;
-    struct sockaddr_in serv_addr, cli_addr;
+    int sockfd, portno, pid;
+    struct sockaddr_in serv_addr;
 
     /* init server */
 
@@ -40,10 +33,6 @@ int init_server(char *addr, const int port)
         error("ERROR on binding");
     listen(sockfd, 5);
 
-    clilen = sizeof(cli_addr);
-
-        newsockfd = accept(sockfd,
-                           (struct sockaddr *) &cli_addr, &clilen);
-    return newsockfd;
+    return sockfd;
 }
 
